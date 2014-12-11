@@ -177,7 +177,7 @@ class GO_OpenCalais
 	        return $response;
     }//end get_tags
 
-    puplic function ajax_get_tags ( )
+    public function ajax_get_tags ( )
     {
     	$POST[ 'content' ];
     }//END ajax_get_tags
