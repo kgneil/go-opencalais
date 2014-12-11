@@ -22,6 +22,9 @@ class GO_OpenCalais
 		} // END if
 
 		$this->admin();
+
+		add_action( 'wp_ajax_go_opencalais_get_tags', array( $this, 'ajax_get_tags' ) );
+
 	}//end __construct
 
 	/**
@@ -135,6 +138,54 @@ class GO_OpenCalais
 
 		return $meta;
 	} // END get_post_meta
+
+	public function get_tags( $content )
+	{
+		if ( empty( $content ) )
+		{
+			return new WP_Error( 'empty-content', 'Cannot enrich empty post', $this->post );
+		}//end if
+
+		$args = array(
+			'body'    => $content,
+			'headers' => array(
+				'X-calais-licenseID' => go_opencalais()->config( 'api_key' ),
+				'Accept'             => 'application/json',
+				'Content-type'       => 'text/html',
+				'enableMetadataType' => 'SocialTags',
+			),
+		);
+
+		$response         = wp_remote_post( 'http://api.opencalais.com/tag/rs/enrich', $args );
+		$response_code    = wp_remote_retrieve_response_code( $response );
+		$response_message = wp_remote_retrieve_response_message( $response );
+		$response_body    = wp_remote_retrieve_body( $response );
+
+		if ( is_wp_error( $response ) )
+		{
+			return $response;
+		}//end if
+		elseif ( 200 != $response_code && ! empty( $response_message ) )
+		{
+			return new WP_Error( 'ajax-error', $response_message );
+		}//end elseif
+		elseif ( 200 != $response_code && ! empty( $response_body ) )
+		{
+			return new WP_Error( 'ajax-error', $response_body );
+		}//end elseif
+		elseif ( 200 != $response_code )
+		{
+			return new WP_Error( 'ajax-error', 'Unknown error occurred' );
+		}//end elseif
+
+		return $response;
+	}//end get_tags
+
+	public function ajax_get_tags( )
+	{
+		$_POST[ 'content' ];
+
+	}//END ajax_get_tags
 }//end class
 
 function go_opencalais()
