@@ -22,6 +22,8 @@ class GO_OpenCalais
 		} // END if
 
 		$this->admin();
+
+		add_action( 'wp_ajax_go_opencalais_get_tags', array( $this, 'ajax_get_tags' ) );
 	}//end __construct
 
 	/**
